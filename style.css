@@ -1,0 +1,31 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 2em;
+  background-color: #f4f4f4;
+}
+
+#phrase-container {
+  background-color: #fff;
+  padding: 1em;
+  margin-bottom: 1em;
+  border: 1px solid #ccc;
+}
+
+#input-area {
+  width: 100%;
+  font-size: 1em;
+  padding: 0.5em;
+}
+
+#next-phrase {
+  margin-top: 1em;
+  padding: 0.5em 1em;
+  font-size: 1em;
+}
+
+#results {
+  margin-top: 2em;
+  background-color: #fff;
+  padding: 1em;
+  border: 1px solid #ccc;
+}
