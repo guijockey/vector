@@ -18,6 +18,18 @@
     <h2>Datos Recolectados</h2>
     <pre id="data-output"></pre>
   </div>
+  <div id="progreso">
+    <label>Progreso de entrenamiento:</label>
+    <progress id="barra-progreso" value="0" max="100"></progress>
+    <span id="porcentaje-progreso">0%</span>
+  </div>
+  
+  <div id="seguridad">
+    <label>Seguridad estimada:</label>
+    <span id="nivel-seguridad">0%</span>
+  </div>
+  
+  <button id="terminar-entrenamiento">Finalizar entrenamiento anticipadamente</button>
   <script src="phrases.js"></script>
   <script src="script.js"></script>
 </body>
