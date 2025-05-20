@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vector - Entrenamiento</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 600px;
+      margin: auto;
+      padding: 2em;
+    }
+    textarea {
+      width: 100%;
+      height: 3em;
+      font-size: 1.2em;
+    }
+    button {
+      margin-top: 1em;
+      padding: 0.5em 1em;
+      font-size: 1em;
+    }
+    #progreso, #seguridad {
+      margin-top: 1em;
+      font-weight: bold;
+    }
+    progress {
+      width: 100%;
+      height: 20px;
+    }
+    #terminar-entrenamiento {
+      margin-top: 2em;
+      padding: 0.5em 1em;
+      background-color: #d9534f;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Vector - Entrenamiento Biométrico</h1>
+
+  <p id="phrase"></p>
+  <textarea id="inputArea" placeholder="Escribe aquí..."></textarea>
+  <button id="nextPhrase">Enviar frase</button>
+
+  <div id="progreso">
+    <label>Progreso de entrenamiento:</label>
+    <progress id="barra-progreso" value="0" max="100"></progress>
+    <span id="porcentaje-progreso">0%</span>
+  </div>
+
+  <div id="seguridad">
+    <label>Seguridad estimada:</label>
+    <span id="nivel-seguridad">0%</span>
+  </div>
+
+  <button id="terminar-entrenamiento">Finalizar entrenamiento anticipadamente</button>
+
+  <script>
+    const phraseList = [
+      "El perro salta sobre la luna",
+      "Teclado en mano, creo sistemas",
+      "Vector autentica sin contraseñas",
+      "Javascript detecta pulsaciones",
+      "Esta frase es para entrenar",
+      "Código seguro para el futuro"
+    ];
+
+    const phrase = document.getElementById("phrase");
+    const inputArea = document.getElementById("inputArea");
+    const nextPhraseButton = document.getElementById("nextPhrase");
+
+    const progresoBarra = document.getElementById("barra-progreso");
+    const progresoTexto = document.getElementById("porcentaje-progreso");
+    const seguridadTexto = document.getElementById("nivel-seguridad");
+    const terminarBtn = document.getElementById("terminar-entrenamiento");
+
+    const muestrasRecomendadas = 30;
+    let currentPhrase = "";
+    let keyTimings = [];
+
+    function randomPhrase() {
+      return phraseList[Math.floor(Math.random() * phraseList.length)];
+    }
+
+    function initialize() {
+      currentPhrase = randomPhrase();
+      phrase.textContent = currentPhrase;
+      inputArea.value = "";
+      keyTimings = [];
+    }
+
+    inputArea.addEventListener("keydown", (e) => {
+      const now = Date.now();
+      keyTimings.push({ key: e.key, time: now });
+    });
+
+    function processKeyTimings(timings) {
+      let result = [];
+      for (let i = 1; i < timings.length; i++) {
+        const interval = timings[i].time - timings[i - 1].time;
+        result.push({
+          from: timings[i - 1].key,
+          to: timings[i].key,
+          interval
+        });
+      }
+      return result;
+    }
+
+    function saveData(vectorData) {
+      let stored = JSON.parse(localStorage.getItem("vectorData")) || [];
+      stored.push(vectorData);
+      localStorage.setItem("vectorData", JSON.stringify(stored));
+    }
+
+    function getMuestrasGuardadas() {
+      return JSON.parse(localStorage.getItem("vectorData")) || [];
+    }
+
+    function calcularVariabilidad(datos) {
+      const intervalos = datos.flatMap(muestra => muestra.map(p => p.interval));
+      const media = intervalos.reduce((a, b) => a + b, 0) / intervalos.length;
+      const variabilidad = intervalos.reduce((sum, i) => sum + Math.abs(i - media), 0) / intervalos.length;
+      return Math.min(100, Math.floor(variabilidad));
+    }
+
+    function actualizarIndicadores() {
+      const datos = getMuestrasGuardadas();
+      const total = datos.length;
+      const progreso = Math.min(100, Math.floor((total / muestrasRecomendadas) * 100));
+      progresoBarra.value = progreso;
+      progresoTexto.textContent = `${progreso}%`;
+
+      const variabilidad = calcularVariabilidad(datos);
+      const seguridad = Math.max(0, Math.min(100, progreso - variabilidad));
+      seguridadTexto.textContent = `${seguridad}%`;
+
+      return seguridad;
+    }
+
+    terminarBtn.addEventListener("click", () => {
+      const seguridad = actualizarIndicadores();
+      const confirmado = confirm(`Vas a finalizar el entrenamiento con un nivel de seguridad estimado del ${seguridad}%. ¿Deseas continuar?`);
+      if (confirmado) {
+        alert("Entrenamiento finalizado. Tu perfil ha sido guardado.");
+        localStorage.setItem("vectorFinalizado", "true");
+      }
+    });
+
+    nextPhraseButton.addEventListener("click", () => {
+      const inputText = inputArea.value;
+      if (inputText === currentPhrase) {
+        const vectorData = processKeyTimings(keyTimings);
+        saveData(vectorData);
+        initialize();
+        actualizarIndicadores();
+      } else {
+        alert("La frase escrita no coincide. Por favor, inténtalo de nuevo.");
+      }
+    });
+
+    // Inicializar
+    initialize();
+    actualizarIndicadores();
+  </script>
+</body>
+</html>
